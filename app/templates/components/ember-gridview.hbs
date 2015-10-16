@@ -1,0 +1,12 @@
+{{#if search}}
+  {{ember-gridview-search
+    searchFieldValue=searchFieldValue}}
+{{/if}}
+{{#each bodyContent as |item|}}
+  {{ember-gridview-row item=item}}
+{{/each}}
+{{#if pagination}}
+  {{ember-gridview-paginator pageCount=pageCount}}
+{{/if}}
+
+{{prop}}
