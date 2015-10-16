@@ -1,2 +1,6 @@
 pages
-{{pageCount}}
+{{#each pages as |page|}}
+  <span {{action 'movePage' page}}>
+    {{page}}
+  </span>
+{{/each}}

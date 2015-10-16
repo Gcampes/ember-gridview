@@ -1,8 +1,8 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-  tagName: 'table',
-  classNames: ['ember-gridview'],
+  // tagName: 'table',
+  // classNames: ['ember-gridview'],
   search: true,
   pagination: true,
   searchFieldValue: null,
@@ -12,21 +12,29 @@ export default Ember.Component.extend({
   originalLoaded: false,
 
 
-  bodyContent: Ember.computed('content', function(){
-
+  bodyContent: Ember.computed('model', 'currentPage', 'filteredCount', function(){
     //Prepare content
-    var model = this.get('content');
+    var model = this.get('model');
+
     var modelLength = model.length;
+
+    if(typeof modelLength != "number")
+      modelLength = model.get('length');
+
+
+    var i = 0;
     var arrayModel = [];
+
+    model.forEach(function(item){
+      arrayModel[i] = [];
+      arrayModel[i]['id'] = item.get('id');
+      item.eachAttribute(function(name, meta){
+        arrayModel[i][name] = item.get(name);
+      })
+      i++;
+    });
     var itemsPerPage = this.get('itemsPerPage');
     var currentPage = this.get('currentPage');
-
-    //Set page count
-    this.set('pageCount', Math.round(modelLength/itemsPerPage));
-
-    //Transfer model to array
-    for(var i = 0; i < modelLength; i++)
-      arrayModel[i] = model[i];
 
     var content = [];
     var indexi = 0;
@@ -44,12 +52,17 @@ export default Ember.Component.extend({
       indexi++;
     });
 
+    this.set('filteredCount', content.length);
+
     if(!this.get('originalLoaded')){
       this.set('originalContent', content);
       this.set('originalLoaded', true);
     }
-
     return content.slice((itemsPerPage*(currentPage-1)), (itemsPerPage*currentPage));
+  }),
+
+  pageCount: Ember.computed('filteredCount', 'itemsPerPage', function(){
+    return this.get('filteredCount')/this.get('itemsPerPage');
   }),
 
   actions: {
@@ -64,6 +77,7 @@ export default Ember.Component.extend({
 
       // Set bodyContent to original if search field is empty
       if(!searchFieldValue){
+        this.set('filteredCount', originalContent.length);
         this.set('bodyContent', originalContent.slice((itemsPerPage*(currentPage-1)), (itemsPerPage*currentPage)));
         return;
       }
@@ -80,9 +94,12 @@ export default Ember.Component.extend({
         return false;
       }
 
+
       // Filter originalContent and sets it to bodyContent
       var bodyContent = originalContent;
       var bodyContent = bodyContent.filter(searchGrid);
+
+      this.set('filteredCount', bodyContent.length);
       this.set('bodyContent', bodyContent.slice((itemsPerPage*(currentPage-1)), (itemsPerPage*currentPage)));
 
       this.send('colorRows');
@@ -93,6 +110,10 @@ export default Ember.Component.extend({
         this.$('tr').css({'background-color' : 'transparent'});
         this.$('tr:odd').css({'background-color' : 'rgb(235, 235, 235)'});
       },0)
+    },
+
+    movePage(page){
+      this.set('currentPage', page);
     }
   },
 

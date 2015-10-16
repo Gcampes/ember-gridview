@@ -2,9 +2,11 @@
   {{ember-gridview-search
     searchFieldValue=searchFieldValue}}
 {{/if}}
-{{#each bodyContent as |item|}}
-  {{ember-gridview-row item=item}}
-{{/each}}
+<table class="ember-gridview">
+  {{#each bodyContent as |item|}}
+    {{ember-gridview-row item=item}}
+  {{/each}}
+</table>
 {{#if pagination}}
   {{ember-gridview-paginator pageCount=pageCount}}
 {{/if}}
